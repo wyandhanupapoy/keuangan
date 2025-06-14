@@ -3,164 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KeuanganKu - Aplikasi Keuangan Pribadi</title>
+    <title>KeuanganKu X - Beyond Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow-sm: 0 4px 15px rgba(0,0,0,0.05);
+            --shadow-md: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
         body {
-            background-color: #f8f9fa;
             font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient-animation 15s ease infinite;
+            transition: opacity 0.5s ease-in-out;
         }
+        body.auth-active { opacity: 1; }
+        
+        /* === Containers & Transitions === */
+        .page-container {
+            transition: opacity 0.5s ease-in-out, filter 0.5s ease-in-out;
+            opacity: 0;
+            filter: blur(5px);
+        }
+        .page-container.visible { opacity: 1; filter: blur(0); }
+
+        /* === Auth Screen === */
         .auth-wrapper {
-            max-width: 450px;
-            margin: 4rem auto;
+            max-width: 450px; margin: 5rem auto; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            background: var(--glass-bg); border-radius: 1.5rem; border: 1px solid var(--glass-border);
         }
-        #app-container {
-            display: none;
+
+        /* === Main App UI === */
+        .app-header {
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            background: var(--glass-bg); border-bottom: 1px solid var(--glass-border);
         }
         .card {
-            border: none;
-            border-radius: 0.75rem;
-            transition: all 0.3s ease-in-out;
+            border: 1px solid var(--glass-border);
+            border-radius: 1.25rem;
+            background: var(--glass-bg);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+        .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+        .summary-card h4 { font-weight: 700; }
+        
+        /* === Transaction List === */
+        .transaction-list-item {
+            display: flex; align-items: center; padding: 1rem; margin-bottom: 0.75rem;
+            border-radius: 1rem; background-color: rgba(255,255,255,0.7);
+            border-left: 5px solid; transition: all 0.3s ease;
+            opacity: 0; animation: fadeIn 0.5s forwards;
         }
-        .summary-card .card-body {
-            display: flex;
-            align-items: center;
+        .transaction-list-item:hover { transform: scale(1.02); box-shadow: var(--shadow-sm); }
+        .transaction-pemasukan { border-color: var(--success-color); }
+        .transaction-pengeluaran { border-color: var(--danger-color); }
+        .transaction-icon { font-size: 1.5rem; margin-right: 1rem; }
+        .transaction-details { flex-grow: 1; }
+        .transaction-amount { font-weight: 600; font-size: 1.1rem; }
+        .btn-action { background-color: rgba(0,0,0,0.05); border: none; }
+
+        /* === Floating Action Button (FAB) === */
+        .fab {
+            position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px;
+            background: linear-gradient(45deg, #0d6efd, #0b5ed7);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 2rem; box-shadow: var(--shadow-md);
+            cursor: pointer; transition: all 0.3s ease; z-index: 1050;
         }
-        .summary-card .icon {
-            font-size: 2.5rem;
-            padding: 1.2rem;
-            border-radius: 50%;
-            color: #fff;
+        .fab:hover { transform: scale(1.1) rotate(90deg); }
+
+        /* === Modals === */
+        .modal-content {
+            border: 1px solid var(--glass-border);
+            border-radius: 1.25rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
         }
-        .icon-income { background-color: rgba(25, 135, 84, 0.8); }
-        .icon-expense { background-color: rgba(220, 53, 69, 0.8); }
-        .icon-balance { background-color: rgba(13, 110, 253, 0.8); }
-        .table-hover tbody tr:hover {
-            background-color: #f0f2f5;
-        }
-        .btn-action {
-            width: 35px;
-            height: 35px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .toast-container {
-            z-index: 1100;
-        }
-        footer {
-            padding: 1.5rem 0;
-            background-color: #e9ecef;
-            color: #6c757d;
-            font-size: 0.9em;
-        }
+        
+        /* === Other Enhancements === */
+        .filter-btn-group .btn.active { background-color: var(--primary-color) !important; color: white !important; }
+        .empty-state { text-align: center; padding: 3rem 1rem; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body>
+<body class="auth-active">
 
-    <div id="app-loader" class="d-flex justify-content-center align-items-center vh-100">
-        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
-
-    <div id="auth-container" class="auth-wrapper d-none">
-        <div class="text-center mb-4">
-            <h1 class="h2 fw-bold">Keuangan<span class="text-primary">Ku</span></h1>
-            <p class="text-muted">Catat dan kelola keuangan pribadimu.</p>
-        </div>
-        <div class="card shadow-lg">
-            <div class="card-body p-4 p-md-5">
-                <ul class="nav nav-pills nav-fill mb-4" id="pills-tab" role="tablist">
-                    <li class="nav-item" role="presentation"><button class="nav-link active" id="pills-login-tab" data-bs-toggle="pill" data-bs-target="#pills-login" type="button" role="tab">Login</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" id="pills-register-tab" data-bs-toggle="pill" data-bs-target="#pills-register" type="button" role="tab">Register</button></li>
-                </ul>
-                <div class="tab-content" id="pills-tabContent">
-                    <div class="tab-pane fade show active" id="pills-login" role="tabpanel">
-                        <form id="form-login">
-                            <div class="form-floating mb-3"><input type="email" class="form-control" id="login-email" placeholder="Email" required><label for="login-email">Alamat Email</label></div>
-                            <div class="form-floating mb-3"><input type="password" class="form-control" id="login-password" placeholder="Password" required><label for="login-password">Password</label></div>
-                            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Login</button>
-                        </form>
-                    </div>
-                    <div class="tab-pane fade" id="pills-register" role="tabpanel">
-                        <form id="form-register">
-                            <div class="form-floating mb-3"><input type="email" class="form-control" id="register-email" placeholder="Email" required><label for="register-email">Alamat Email</label></div>
-                            <div class="form-floating mb-3"><input type="password" class="form-control" id="register-password" placeholder="Password (min. 6 karakter)" required><label for="register-password">Password</label></div>
-                            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Register</button>
-                        </form>
-                    </div>
-                </div>
-                <div id="auth-alert" class="alert alert-danger mt-3 d-none" role="alert"></div>
-            </div>
-        </div>
+    <div id="auth-container" class="page-container">
+        <div class="auth-wrapper shadow-lg"><div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4"><h1 class="h2 fw-bold text-dark">Keuangan<span class="text-primary">Ku X</span></h1><p>Masuk untuk memulai revolusi keuanganmu.</p></div>
+            <ul class="nav nav-pills nav-fill mb-4"><li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-login">Login</button></li><li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-register">Register</button></li></ul>
+            <div class="tab-content"><div class="tab-pane fade show active" id="pills-login"><form id="form-login"><div class="form-floating mb-3"><input type="email" class="form-control" id="login-email" placeholder="Email" required><label>Alamat Email</label></div><div class="form-floating mb-3"><input type="password" class="form-control" id="login-password" placeholder="Password" required><label>Password</label></div><button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Login</button></form></div><div class="tab-pane fade" id="pills-register"><form id="form-register"><div class="form-floating mb-3"><input type="email" class="form-control" id="register-email" placeholder="Email" required><label>Alamat Email</label></div><div class="form-floating mb-3"><input type="password" class="form-control" id="register-password" placeholder="Password" required><label>Password</label></div><button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Register</button></form></div></div>
+            <div id="auth-alert" class="alert alert-danger mt-3 d-none"></div>
+        </div></div>
     </div>
     
-    <div id="app-container">
-        <header class="bg-white shadow-sm sticky-top">
-            <div class="container">
-                <nav class="navbar navbar-expand-lg">
-                    <a class="navbar-brand fw-bolder fs-4" href="#">Keuangan<span class="text-primary">Ku</span></a>
-                    <div class="ms-auto d-flex align-items-center">
-                        <span id="user-email" class="navbar-text me-3 text-muted d-none d-md-block"></span>
-                        <button id="tombol-logout" class="btn btn-outline-danger"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
-                    </div>
-                </nav>
-            </div>
-        </header>
+    <div id="app-container" class="page-container">
+        <header class="app-header sticky-top"><div class="container-fluid px-4"><nav class="navbar"><a class="navbar-brand fw-bolder fs-4 text-dark" href="#">Keuangan<span class="text-primary">Ku X</span></a><div class="d-flex align-items-center"><span id="user-email" class="navbar-text me-3 text-muted d-none d-md-block"></span><button id="tombol-logout" class="btn btn-outline-danger btn-sm">Logout</button></div></nav></div></header>
         
-        <main class="container my-4 my-md-5">
-            <section class="row g-4 mb-5">
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm summary-card h-100"><div class="card-body"><div class="icon icon-income me-3"><i class="bi bi-arrow-down-short"></i></div><div><h6 class="card-title text-muted text-uppercase small">Total Pemasukan</h6><h4 id="total-pemasukan" class="fw-bold">Rp 0</h4></div></div></div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm summary-card h-100"><div class="card-body"><div class="icon icon-expense me-3"><i class="bi bi-arrow-up-short"></i></div><div><h6 class="card-title text-muted text-uppercase small">Total Pengeluaran</h6><h4 id="total-pengeluaran" class="fw-bold">Rp 0</h4></div></div></div>
-                </div>
-                <div class="col-12 col-lg-4">
-                    <div class="card shadow-sm summary-card h-100"><div class="card-body"><div class="icon icon-balance me-3"><i class="bi bi-wallet2"></i></div><div><h6 class="card-title text-muted text-uppercase small">Saldo Akhir</h6><h4 id="saldo-akhir" class="fw-bold">Rp 0</h4></div></div></div>
-                </div>
+        <main class="container-fluid px-4 my-4">
+            <section class="row g-4 mb-4">
+                <div class="col-lg-7"><div class="card h-100"><div class="card-body p-4"><div id="chart-container" style="position: relative; height: 300px;"><canvas id="chart-distribusi"></canvas></div></div></div></div>
+                <div class="col-lg-5"><div class="row g-4"><div class="col-12"><div class="card summary-card"><div class="card-body p-4"><div><h6 class="text-muted text-uppercase small">Saldo Akhir</h6><h4 id="saldo-akhir">Rp 0</h4></div></div></div></div><div class="col-6"><div class="card summary-card"><div class="card-body p-3"><div><h6 class="text-muted text-uppercase small">Pemasukan</h6><h4 id="total-pemasukan" class="text-success">Rp 0</h4></div></div></div></div><div class="col-6"><div class="card summary-card"><div class="card-body p-3"><div><h6 class="text-muted text-uppercase small">Pengeluaran</h6><h4 id="total-pengeluaran" class="text-danger">Rp 0</h4></div></div></div></div></div></div>
             </section>
             
-            <section class="row g-4 g-lg-5">
-                <div class="col-lg-4">
-                    <div class="card shadow-sm mb-4"><div class="card-body p-4"><h5 class="card-title fw-bold mb-3">Tambah Transaksi</h5><form id="form-tambah" class="row g-3"><div class="col-12"><label for="deskripsi" class="form-label">Deskripsi</label><input type="text" id="deskripsi" class="form-control" required></div><div class="col-12"><label for="jumlah" class="form-label">Jumlah (Rp)</label><input type="number" id="jumlah" class="form-control" required></div><div class="col-12"><label for="tipe" class="form-label">Tipe</label><select id="tipe" class="form-select" required><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select></div><div class="col-12"><label for="tanggal" class="form-label">Tanggal</label><input type="date" id="tanggal" class="form-control" required></div><div class="col-12"><button type="submit" class="btn btn-primary w-100 py-2 fw-bold"><span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span><i class="bi bi-plus-circle me-2"></i> Simpan Transaksi</button></div></form></div></div>
-                    <div class="card shadow-sm"><div class="card-body p-4"><h5 class="card-title fw-bold mb-3">Distribusi</h5><div id="chart-container" style="min-height: 200px; display: flex; align-items: center; justify-content: center;"><canvas id="chart-distribusi"></canvas></div></div></div>
+            <section class="card"><div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+                    <h5 class="fw-bold mb-0">Riwayat Transaksi</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="input-group input-group-sm"><span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span><input type="text" id="search-input" class="form-control bg-light border-0" placeholder="Cari deskripsi..."></div>
+                        <div id="filter-btn-group" class="btn-group btn-group-sm" role="group"><button type="button" class="btn btn-outline-secondary active" data-filter="all">Semua</button><button type="button" class="btn btn-outline-secondary" data-filter="pemasukan">Pemasukan</button><button type="button" class="btn btn-outline-secondary" data-filter="pengeluaran">Pengeluaran</button></div>
+                    </div>
                 </div>
-                
-                <div class="col-lg-8">
-                    <div class="card shadow-sm"><div class="card-body p-4"><h5 class="card-title fw-bold mb-3">Riwayat Transaksi</h5><div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Tanggal</th><th>Deskripsi</th><th class="text-end">Jumlah</th><th class="text-center">Aksi</th></tr></thead><tbody id="riwayat-transaksi"></tbody></table></div></div></div>
-                </div>
-            </section>
+                <div id="transaction-list-container"></div>
+            </div></section>
         </main>
         
-        <footer class="mt-5 text-center">
-            <div class="container">
-                <p>&copy; <span id="copyright-year"></span> wyandhanu. All Rights Reserved.</p>
-            </div>
-        </footer>
+        <div id="fab-add" class="fab"><i class="bi bi-plus-lg"></i></div>
     </div>
 
-    <div class="modal fade" id="modal-edit" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold">Edit Transaksi</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form id="form-edit"><input type="hidden" id="edit-id"><div class="mb-3"><label for="edit-deskripsi" class="form-label">Deskripsi</label><input type="text" id="edit-deskripsi" class="form-control" required></div><div class="mb-3"><label for="edit-jumlah" class="form-label">Jumlah</label><input type="number" id="edit-jumlah" class="form-control" required></div><div class="mb-3"><label for="edit-tipe" class="form-label">Tipe</label><select id="edit-tipe" class="form-select" required><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select></div><div class="mb-3"><label for="edit-tanggal" class="form-label">Tanggal</label><input type="date" id="edit-tanggal" class="form-control" required></div></form></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" id="tombol-simpan-edit" class="btn btn-primary fw-bold">Simpan Perubahan</button></div></div></div></div>
-
-    <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="app-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <i class="bi bi-bell-fill me-2"></i>
-                <strong class="me-auto" id="toast-title">Notifikasi</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body" id="toast-body"></div>
-        </div>
-    </div>
+    <div class="modal fade" id="transaction-modal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header border-0"><h5 class="modal-title fw-bold" id="modal-title">Tambah Transaksi Baru</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form id="form-transaksi" class="needs-validation" novalidate><input type="hidden" id="transaksi-id"><div class="mb-3"><label class="form-label">Deskripsi</label><input type="text" id="deskripsi" class="form-control" required><div class="invalid-feedback">Deskripsi harus diisi.</div></div><div class="mb-3"><label class="form-label">Jumlah (Rp)</label><input type="number" id="jumlah" class="form-control" required min="1"><div class="invalid-feedback">Jumlah tidak valid.</div></div><div class="row gx-2 mb-3"><div class="col"><label class="form-label">Tipe</label><select id="tipe" class="form-select" required><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select></div><div class="col"><label class="form-label">Tanggal</label><input type="date" id="tanggal" class="form-control" required></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" id="tombol-simpan" class="btn btn-primary fw-bold">Simpan</button></div></form></div></div></div></div>
+    
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100"><div id="app-toast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true"><div class="d-flex"><div class="toast-body"></div><button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
