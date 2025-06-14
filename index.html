@@ -31,6 +31,39 @@
             </div></div></div>
         </section>
 
+        <section class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Tambah Transaksi Baru</h5>
+                <form id="form-tambah" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="deskripsi" class="form-label">Deskripsi</label>
+                        <input type="text" id="deskripsi" name="deskripsi" class="form-control" placeholder="Contoh: Gaji bulanan" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="jumlah" class="form-label">Jumlah (Rp)</label>
+                        <input type="number" id="jumlah" name="jumlah" class="form-control" placeholder="50000" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="tipe" class="form-label">Tipe Transaksi</label>
+                        <select id="tipe" name="tipe" class="form-select" required>
+                            <option value="pemasukan">Pemasukan</option>
+                            <option value="pengeluaran">Pengeluaran</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="tanggal" class="form-label">Tanggal</label>
+                        <input type="date" id="tanggal" name="tanggal" class="form-control" required>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <span id="button-text">Simpan Transaksi</span>
+                            <span id="button-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
         <section class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title mb-3">Riwayat Transaksi</h5>
