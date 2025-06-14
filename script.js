@@ -127,23 +127,40 @@ document.addEventListener('DOMContentLoaded', () => {
     editModal = new bootstrap.Modal(document.getElementById('modal-edit'));
 
     // Event listener untuk form tambah (disesuaikan untuk menyertakan user_id)
-    document.getElementById('form-tambah').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const form = event.currentTarget;
-        const { data: { user } } = await supabase.auth.getUser(); // Dapatkan user yg login
+    // Event listener untuk form tambah (disesuaikan untuk menyertakan user_id)
+document.getElementById('form-tambah').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector('button');
+    button.disabled = true; // Nonaktifkan tombol saat proses berjalan
 
-        if (user) {
-            await supabase.from('transaksi').insert([{
-                deskripsi: form.elements.deskripsi.value,
-                jumlah: form.elements.jumlah.value,
-                tipe: form.elements.tipe.value,
-                tanggal: form.elements.tanggal.value,
-                user_id: user.id // KIRIM USER ID KE DATABASE
-            }]);
+    // LANGKAH PENTING: Dapatkan informasi pengguna yang sedang login
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Pastikan kita berhasil mendapatkan data user sebelum melanjutkan
+    if (user) {
+        // Kirim data ke tabel 'transaksi', sertakan user.id
+        const { error } = await supabase.from('transaksi').insert([{
+            deskripsi: form.elements.deskripsi.value,
+            jumlah: form.elements.jumlah.value,
+            tipe: form.elements.tipe.value,
+            tanggal: form.elements.tanggal.value,
+            user_id: user.id // <-- INI KUNCINYA!
+        }]);
+
+        if (error) {
+            console.error('Gagal menambah data:', error);
+            alert('Gagal menyimpan data! Lihat console untuk detail.');
+        } else {
             form.reset();
-            await loadTransaksi();
+            await loadTransaksi(); // Muat ulang data jika berhasil
         }
-    });
+    } else {
+        alert("Sesi Anda tidak valid. Silakan login kembali.");
+    }
+    
+    button.disabled = false; // Aktifkan kembali tombolnya
+});
 
     // Event listener untuk tombol simpan di modal edit
     document.getElementById('tombol-simpan-edit').addEventListener('click', async () => {
