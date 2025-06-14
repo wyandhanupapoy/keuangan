@@ -9,137 +9,221 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="icon" type="image/png" href="https://placehold.co/32x32/3b82f6/ffffff?text=K">
+    <link rel="icon" type="image/png" href="https://via.placeholder.com/32">
     <style>
+        .toast { transition: opacity 0.3s ease-in-out; }
         .modal { backdrop-filter: blur(5px); }
+        .dark .modal { background: rgba(0, 0, 0, 0.7); }
+        input:invalid:focus { border-color: #ef4444; }
+        .animate-pulse { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     </style>
 </head>
 <body class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <!-- Loading Overlay -->
     <div id="app-loader" class="fixed inset-0 bg-gray-100 dark:bg-gray-900 flex items-center justify-center z-50">
         <div class="flex flex-col items-center">
             <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <p class="mt-4 text-lg font-medium">Memuat Aplikasi...</p>
+            <p class="mt-4 text-lg font-medium">Memuat...</p>
         </div>
     </div>
 
+    <!-- Auth Container -->
     <div id="auth-container" class="hidden min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
             <h1 class="text-3xl font-bold text-center mb-6">KeuanganKu</h1>
             <p class="text-center text-gray-600 dark:text-gray-300 mb-8">Catat dan kelola keuangan pribadimu.</p>
+
             <div class="flex space-x-4 mb-6">
                 <button id="tab-login" class="w-1/2 py-2 text-center font-medium border-b-2 border-blue-500">Login</button>
-                <button id="tab-register" class="w-1/2 py-2 text-center font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400">Register</button>
+                <button id="tab-register" class="w-1/2 py-2 text-center font-medium border-b-2 border-transparent">Register</button>
             </div>
-            <div id="auth-alert" class="hidden p-4 mb-6 text-sm rounded-lg"></div>
+
+            <!-- Alert -->
+            <div id="auth-alert" class="hidden p-4 mb-6 bg-red-100 text-red-700 rounded-lg"></div>
+
+            <!-- Login Form -->
             <form id="form-login" class="space-y-6">
                 <div>
                     <label for="login-email" class="block text-sm font-medium mb-1">Alamat Email</label>
-                    <input type="email" id="login-email" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="nama@email.com">
+                    <input type="email" id="login-email" name="login-email" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan email">
                 </div>
                 <div>
                     <label for="login-password" class="block text-sm font-medium mb-1">Password</label>
-                    <input type="password" id="login-password" required minlength="6" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+                    <input type="password" id="login-password" name="login-password" required minlength="6" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan password">
                 </div>
                 <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center">
-                    <span class="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin hidden mr-2"></span>
+                    <span class="spinner-border w-5 h-5 border-2 border-t-transparent rounded-full animate-spin hidden mr-2"></span>
                     Login
                 </button>
             </form>
+
+            <!-- Register Form -->
             <form id="form-register" class="space-y-6 hidden">
                 <div>
                     <label for="register-email" class="block text-sm font-medium mb-1">Alamat Email</label>
-                    <input type="email" id="register-email" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="nama@email.com">
+                    <input type="email" id="register-email" name="register-email" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan email">
                 </div>
                 <div>
                     <label for="register-password" class="block text-sm font-medium mb-1">Password</label>
-                    <input type="password" id="register-password" required minlength="6" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Minimal 6 karakter">
+                    <input type="password" id="register-password" name="register-password" required minlength="6" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan password">
                 </div>
                 <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center">
-                    <span class="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin hidden mr-2"></span>
+                    <span class="spinner-border w-5 h-5 border-2 border-t-transparent rounded-full animate-spin hidden mr-2"></span>
                     Register
                 </button>
             </form>
         </div>
     </div>
 
+    <!-- Main App Container -->
     <div id="app-container" class="hidden">
+        <!-- Header -->
         <header class="bg-white dark:bg-gray-800 shadow sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
                 <div class="flex items-center space-x-4">
                     <h1 class="text-2xl font-bold">KeuanganKu</h1>
-                    <span id="user-email" class="text-sm text-gray-600 dark:text-gray-300 hidden md:block"></span>
+                    <span id="user-email" class="text-sm text-gray-600 dark:text-gray-300"></span>
                 </div>
-                <div class="flex items-center space-x-2 sm:space-x-4">
+                <div class="flex items-center space-x-4">
                     <button id="toggle-dark-mode" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                        <i id="theme-icon" class="bi text-lg"></i>
+                        <i class="bi bi-moon-stars-fill text-lg"></i>
                     </button>
-                    <button id="tombol-logout" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm font-medium">Logout</button>
+                    <button id="tombol-logout" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">Logout</button>
                 </div>
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow"><h3 class="text-lg font-semibold mb-2">Total Pemasukan</h3><p id="total-pemasukan" class="text-2xl font-bold text-green-500">Rp 0</p></div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow"><h3 class="text-lg font-semibold mb-2">Total Pengeluaran</h3><p id="total-pengeluaran" class="text-2xl font-bold text-red-500">Rp 0</p></div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow"><h3 class="text-lg font-semibold mb-2">Saldo Akhir</h3><p id="saldo-akhir" class="text-2xl font-bold text-blue-500">Rp 0</p></div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+                    <h3 class="text-lg font-semibold mb-2">Total Pemasukan</h3>
+                    <p id="total-pemasukan" class="text-2xl font-bold text-green-500">Rp 0</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+                    <h3 class="text-lg font-semibold mb-2">Total Pengeluaran</h3>
+                    <p id="total-pengeluaran" class="text-2xl font-bold text-red-500">Rp 0</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+                    <h3 class="text-lg font-semibold mb-2">Saldo Akhir</h3>
+                    <p id="saldo-akhir" class="text-2xl font-bold text-blue-500">Rp 0</p>
+                </div>
             </div>
 
+            <!-- Transaction Form -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
-                <h2 class="text-xl font-semibold mb-4">Tambah Transaksi Baru</h2>
-                <form id="form-tambah" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <div class="md:col-span-2"><label for="deskripsi" class="block text-sm font-medium mb-1">Deskripsi</label><input type="text" id="deskripsi" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Gaji bulanan"></div>
-                    <div><label for="jumlah" class="block text-sm font-medium mb-1">Jumlah (Rp)</label><input type="number" id="jumlah" required min="1" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="50000"></div>
-                    <div><label for="tipe" class="block text-sm font-medium mb-1">Tipe</label><select id="tipe" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select></div>
-                    <div class="md:col-span-2"><label for="tanggal" class="block text-sm font-medium mb-1">Tanggal</label><input type="date" id="tanggal" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
-                    <div class="md:col-span-2"><button type="submit" class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center font-medium"><span class="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin hidden mr-2"></span>Simpan Transaksi</button></div>
+                <h2 class="text-xl font-semibold mb-4">Tambah Transaksi</h2>
+                <form id="form-tambah" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="deskripsi" class="block text-sm font-medium mb-1">Deskripsi</label>
+                        <input type="text" id="deskripsi" name="deskripsi" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan deskripsi">
+                    </div>
+                    <div>
+                        <label for="jumlah" class="block text-sm font-medium mb-1">Jumlah (Rp)</label>
+                        <input type="number" id="jumlah" name="jumlah" required min="0" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan jumlah">
+                    </div>
+                    <div>
+                        <label for="tipe" class="block text-sm font-medium mb-1">Tipe</label>
+                        <select id="tipe" name="tipe" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="pemasukan">Pemasukan</option>
+                            <option value="pengeluaran">Pengeluaran</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="tanggal" class="block text-sm font-medium mb-1">Tanggal</label>
+                        <input type="date" id="tanggal" name="tanggal" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center">
+                            <span class="spinner-border w-5 h-5 border-2 border-t-transparent rounded-full animate-spin hidden mr-2"></span>
+                            Simpan Transaksi
+                        </button>
+                    </div>
                 </form>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-                    <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-semibold">Riwayat Transaksi</h2><button id="export-csv" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium">Export CSV</button></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left"><thead class="border-b dark:border-gray-700"><tr ><th class="py-3 px-4">Tanggal</th><th class="py-3 px-4">Deskripsi</th><th class="py-3 px-4 text-right">Jumlah</th><th class="py-3 px-4 text-center">Aksi</th></tr></thead><tbody id="riwayat-transaksi"></tbody></table></div>
+            <!-- Chart -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
+                <h2 class="text-xl font-semibold mb-4">Distribusi</h2>
+                <div id="chart-container" class="h-64">
+                    <canvas id="chart-distribusi"></canvas>
                 </div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-                    <h2 class="text-xl font-semibold mb-4">Distribusi Keuangan</h2>
-                    <div id="chart-container" class="h-64 flex items-center justify-center"><canvas id="chart-distribusi"></canvas></div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Riwayat Transaksi</h2>
+                    <button id="export-csv" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">Export CSV</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b dark:border-gray-700">
+                                <th class="py-3 px-4">Tanggal</th>
+                                <th class="py-3 px-4">Deskripsi</th>
+                                <th class="py-3 px-4 text-right">Jumlah</th>
+                                <th class="py-3 px-4 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="riwayat-transaksi"></tbody>
+                    </table>
                 </div>
             </div>
         </main>
 
-        <footer class="bg-white dark:bg-gray-800 py-6 mt-8 border-t dark:border-gray-700"><p class="text-center text-sm text-gray-600 dark:text-gray-300">© <span id="copyright-year"></span> wyandhanu. All Rights Reserved.</p></footer>
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-gray-800 py-4 mt-8">
+            <p class="text-center text-gray-600 dark:text-gray-300">© <span id="copyright-year"></span> wyandhanu. All Rights Reserved.</p>
+        </footer>
     </div>
 
-    <div id="modal-edit" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 modal">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl w-full max-w-md m-4">
+    <!-- Edit Modal -->
+    <div id="modal-edit" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl w-full max-w-md">
             <h2 class="text-xl font-semibold mb-4">Edit Transaksi</h2>
             <form id="form-edit" class="space-y-4">
                 <input type="hidden" id="edit-id">
-                <div><label for="edit-deskripsi" class="block text-sm font-medium mb-1">Deskripsi</label><input type="text" id="edit-deskripsi" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
-                <div><label for="edit-jumlah" class="block text-sm font-medium mb-1">Jumlah</label><input type="number" id="edit-jumlah" required min="1" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
-                <div><label for="edit-tipe" class="block text-sm font-medium mb-1">Tipe</label><select id="edit-tipe" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select></div>
-                <div><label for="edit-tanggal" class="block text-sm font-medium mb-1">Tanggal</label><input type="date" id="edit-tanggal" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
-                <div class="flex space-x-4 pt-2">
+                <div>
+                    <label for="edit-deskripsi" class="block text-sm font-medium mb-1">Deskripsi</label>
+                    <input type="text" id="edit-deskripsi" name="edit-deskripsi" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan deskripsi">
+                </div>
+                <div>
+                    <label for="edit-jumlah" class="block text-sm font-medium mb-1">Jumlah</label>
+                    <input type="number" id="edit-jumlah" name="edit-jumlah" required min="0" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan jumlah">
+                </div>
+                <div>
+                    <label for="edit-tipe" class="block text-sm font-medium mb-1">Tipe</label>
+                    <select id="edit-tipe" name="edit-tipe" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="pemasukan">Pemasukan</option>
+                        <option value="pengeluaran">Pengeluaran</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="edit-tanggal" class="block text-sm font-medium mb-1">Tanggal</label>
+                    <input type="date" id="edit-tanggal" name="edit-tanggal" required class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex space-x-4">
                     <button type="button" id="tombol-batal-edit" class="w-1/2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-100 p-3 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-700 transition-colors">Batal</button>
                     <button type="submit" id="tombol-simpan-edit" class="w-1/2 bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center">
-                        <span class="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin hidden mr-2"></span>
-                        Simpan
+                        <span class="spinner-border w-5 h-5 border-2 border-t-transparent rounded-full animate-spin hidden mr-2"></span>
+                        Simpan Perubahan
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="app-toast" class="fixed bottom-5 right-5 w-full max-w-xs p-4 rounded-lg shadow-lg hidden transition-opacity duration-300 z-50">
-        <div class="flex items-start">
-            <div id="toast-icon" class="flex-shrink-0"></div>
-            <div class="ml-3 w-0 flex-1 pt-0.5">
-                <p id="toast-title" class="text-sm font-semibold"></p>
-                <p id="toast-body" class="mt-1 text-sm"></p>
-            </div>
-            <div class="ml-4 flex-shrink-0 flex"><button id="toast-close" class="inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2"><i class="bi bi-x-lg"></i></button></div>
+    <!-- Toast Notification -->
+    <div id="app-toast" class="fixed bottom-4 right-4 max-w-xs bg-white dark:bg-gray-800 shadow-lg rounded-lg hidden">
+        <div class="flex items-center justify-between p-4 border-b dark:border-gray-700">
+            <h3 id="toast-title" class="font-semibold"></h3>
+            <button id="toast-close" class="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100">
+                <i class="bi bi-x-lg"></i>
+            </button>
         </div>
+        <div id="toast-body" class="p-4"></div>
     </div>
 
     <script src="script.js"></script>
